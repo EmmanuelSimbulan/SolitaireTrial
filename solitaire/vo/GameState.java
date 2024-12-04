@@ -105,7 +105,8 @@ public class GameState {
                         moved = true;
                         moves++;
                         // Log the move
-                        CardMovementHandler.logCardMovement(topCard, "Foundation", (foundation.indexOf(column) + 1));
+                        int foundationIndex = topCard.getSuit().ordinal();
+                        CardMovementHandler.logCardMovement(topCard, "Foundation", foundationIndex + 1);
                         updated = true;  // Mark that game state was updated
                         break;
                     }
@@ -121,7 +122,8 @@ public class GameState {
                     moved = true;
                     moves++;
                     // Log the move
-                    CardMovementHandler.logCardMovement(topCard, "Foundation", foundation.indexOf(topCard) + 1);
+                    int foundationIndex = topCard.getSuit().ordinal();
+                    CardMovementHandler.logCardMovement(topCard, "Foundation", foundationIndex + 1);
                     updated = true;
                 } else {
                     for (ArrayDeque<Card> column : tableau) {
