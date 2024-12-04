@@ -105,8 +105,7 @@ public class GameState {
                         moved = true;
                         moves++;
                         // Log the move
-                        int foundationIndex = topCard.getSuit().ordinal();
-                        CardMovementHandler.logCardMovement(topCard, "Foundation", foundationIndex + 1);
+                        CardMovementHandler.logCardMovement(topCard, "Foundation", (foundation.indexOf(column) + 1));
                         updated = true;  // Mark that game state was updated
                         break;
                     }
@@ -122,8 +121,7 @@ public class GameState {
                     moved = true;
                     moves++;
                     // Log the move
-                    int foundationIndex = topCard.getSuit().ordinal();
-                    CardMovementHandler.logCardMovement(topCard, "Foundation", foundationIndex + 1);
+                    CardMovementHandler.logCardMovement(topCard, "Foundation", foundation.indexOf(topCard) + 1);
                     updated = true;
                 } else {
                     for (ArrayDeque<Card> column : tableau) {
@@ -191,31 +189,31 @@ public class GameState {
                 updateGameState();
                 updated = false; // Reset the updated flag after the game state is updated
             }
-
-            // Check if no moves are possible to avoid infinite loop
-            if (!moved && talon.isEmpty() && waste.isEmpty()) {
-                System.out.println("No more possible moves. Game Over!");
-                gameOver = true;
-            }
         }
+
     }
 
     // Redeals cards from waste to talon and resets the waste
     private void redealTalon() {
-        // Check if waste is empty before attempting to redeal
-        if (waste.isEmpty()) {
-            System.out.println("No cards in waste to redeal.");
-            return;
+        // Redealing one card from talon to waste or multiple if Turn 3
+        if (turnModeHandler.getTurnMode() == TurnModeHandler.TurnMode.TURN_1) {
+            Card talonCard = talon.pop();  // Take the top card from talon
+            waste.push(talonCard);         // Move to waste
+            System.out.println("The talon card " + talonCard + " is moved to the waste pile.");
+        } else if (turnModeHandler.getTurnMode() == TurnModeHandler.TurnMode.TURN_3) {
+            for (int i = 0; i < 3 && !talon.isEmpty(); i++) {
+                Card talonCard = talon.pop();  // Take the next card from talon
+                waste.push(talonCard);         // Move to waste
+            }
+            System.out.println("Three cards from talon have been moved to the waste pile.");
         }
-
-        // Move all cards from waste back to talon
-        while (!waste.isEmpty()) {
-            talon.push(waste.pop());
+        passesThroughTalon++; // Increment the passes-through counter
+        // Re-shuffle the waste cards back into talon
+        if (passesThroughTalon < 2) {
+            talon.addAll(waste);
+            waste.clear(); // Clear the waste pile after the redeal
+            CardRenderer.renderTalon(talon, turnModeHandler); // Re-render the talon
         }
-
-        // Increment passes through talon
-        passesThroughTalon++;
-        CardRenderer.renderTalon(talon, turnModeHandler); // Re-render the talon
     }
 
     // Checks and returns true if the card can be added to the foundation
