@@ -121,6 +121,11 @@ public class GameState {
                     if (!sourceColumn.isEmpty()) {
                         Card topCard = sourceColumn.peekLast();
                         if (topCard.isFaceUp()) {
+                            // Check if the top card is a King and the first card in the column
+                            if (topCard.getRank() == Rank.KING && sourceColumn.size() == 1) {
+                                // Skip moving this King as it is the first card in its column
+                                continue;
+                            }
                             // Try moving this card to another tableau column
                             for (int j = 0; j < tableau.size(); j++) {
                                 if (i != j) {  // Don't move within the same column
@@ -129,12 +134,12 @@ public class GameState {
                                         // If the target tableau is empty, only a King can be placed
                                         targetColumn.addLast(sourceColumn.pollLast());
                                         targetColumn.peekLast().setFaceUp(true);
-                                        
+
                                         // Flip the next card in the source column face-up, if any remain
                                         if (!sourceColumn.isEmpty()) {
                                             sourceColumn.peekLast().setFaceUp(true);
                                         }
-                                        
+
                                         moved = true;
                                         updated = true;
                                         moves++;
@@ -147,12 +152,12 @@ public class GameState {
                                             targetTopCard.getSuit().getColor() != topCard.getSuit().getColor()) {
                                             targetColumn.addLast(sourceColumn.pollLast());  // Move the card
                                             targetColumn.peekLast().setFaceUp(true);
-                                            
-                                         // Flip the next card in the source column face-up, if any remain
+
+                                            // Flip the next card in the source column face-up, if any remain
                                             if (!sourceColumn.isEmpty()) {
                                                 sourceColumn.peekLast().setFaceUp(true);
                                             }
-                                            
+
                                             moved = true;
                                             updated = true;
                                             moves++;
