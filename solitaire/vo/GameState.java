@@ -22,7 +22,7 @@ public class GameState {
     private boolean isInitialStateRendered = false; // Track whether the initial game state has been rendered
 
     // Constructor now initializes the tracking fields and TurnModeHandler
-    public GameState() { 
+    public GameState() {
         this.turnModeHandler = new TurnModeHandler(); // Initialize TurnModeHandler
         this.moves = 0; // Initialize move counter
         this.passesThroughTalon = 0; // Initialize passes through talon counter
@@ -224,9 +224,9 @@ public class GameState {
 
             // 3. Try moving cards from talon to tableau or foundation
             if (!moved && !talon.isEmpty()) {
-                Card topCard = talon.peek();
+                Card topCard = talon.peekLast();
                 if (addToFoundation(topCard)) {
-                    talon.pop();
+                    talon.pollLast();
                     moved = true;
                     updated = true;
                     moves++;
@@ -234,8 +234,8 @@ public class GameState {
                 } else {
                     for (ArrayDeque<Card> column : tableau) {
                         if (column.isEmpty() && topCard.getRank() == Rank.KING) {
-                            column.push(talon.pop()); // Place King in empty tableau
-                            column.peek().setFaceUp(true);
+                            column.addLast(talon.pollLast()); // Place King in empty tableau // it is wrong since i'm using array deque 
+                            column.peekLast().setFaceUp(true);
                             moved = true;
                             updated = true;
                             moves++;
@@ -246,7 +246,7 @@ public class GameState {
                             if (topColumnCard != null &&
                                     topColumnCard.getRank().ordinal() == topCard.getRank().ordinal() + 1 &&
                                     topColumnCard.getSuit().getColor() != topCard.getSuit().getColor()) {
-                                column.addLast(talon.poll()); // Add to tableau
+                                column.addLast(talon.pollLast()); // Add to tableau
                                 column.peekLast().setFaceUp(true);
                                 moved = true;
                                 updated = true;
@@ -279,7 +279,7 @@ public class GameState {
             }
 
             // Redeal cards if talon is empty and waste is non-empty
-            if (!moved && talon.isEmpty() && !waste.isEmpty() && passesThroughTalon < 3) {
+            if (!moved && talon.isEmpty() && !waste.isEmpty() && passesThroughTalon < 2) {
                 System.out.println("Redealing cards from waste to talon...");
                 redealTalon();
                 updated = true;
@@ -306,6 +306,12 @@ public class GameState {
         }
     }
     
+    private boolean canMoveCardsToAnotherColumn(Card topCard, Card nextCard) {
+        return nextCard.getRank().ordinal() == topCard.getRank().ordinal() - 1 &&
+               nextCard.getSuit().getColor() != topCard.getSuit().getColor();
+    }
+
+
     // Check for valid moves across tableau, foundation, and talon
     private boolean hasValidMoves() {
         for (ArrayDeque<Card> column : tableau) {
